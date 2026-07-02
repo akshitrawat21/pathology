@@ -1,0 +1,27 @@
+# Environment files (never commit secrets) — .env.example stays tracked
+.env
+**/.env
+.env.local
+**/.env.local
+
+# Python / backend
+backend/.venv/
+__pycache__/
+*.pyc
+*.db
+*.sqlite3
+backend/storage/
+.pytest_cache/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+*.local
+.vite/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

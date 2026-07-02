@@ -1,0 +1,25 @@
+# --- Web framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20         # multipart/form-data file uploads
+
+# --- Data layer ---
+SQLAlchemy==2.0.36
+alembic==1.14.0                  # migrations
+psycopg2-binary==2.9.10          # PostgreSQL driver (prod); SQLite is built in
+
+# --- Config / validation ---
+pydantic==2.10.4
+pydantic-settings==2.7.1
+email-validator==2.2.0           # required by pydantic EmailStr
+
+# --- Auth ---
+PyJWT==2.10.1                    # our own session tokens
+google-auth==2.37.0             # verify Google ID tokens
+requests==2.32.3                # transport for google-auth token verification
+cryptography==44.0.0
+
+# --- Whole Slide Imaging ---
+openslide-python==1.4.1         # OpenSlide bindings
+openslide-bin==4.0.0.6          # bundled OpenSlide binaries (no system install needed)
+Pillow==11.1.0                  # tile encoding (JPEG/PNG)

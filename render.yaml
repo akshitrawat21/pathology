@@ -1,0 +1,62 @@
+# Render Blueprint — deploys the whole app in one click.
+#
+# How to use:
+#   1. Push this repo to GitHub.
+#   2. Render Dashboard → New → Blueprint → pick this repo → Apply.
+#      This creates two services: the API (Python) and the web app (static).
+#   3. After they're created you'll have two URLs. Set the three env vars marked
+#      "sync: false" (they depend on those URLs — see the notes below), then:
+#         - redeploy the web service (Vite bakes VITE_API_BASE_URL at build time)
+#         - add the web URL to Google Cloud → Authorized JavaScript origins
+#
+# Free tier note: free services sleep when idle and use an EPHEMERAL filesystem,
+# so uploaded slides + the SQLite DB reset on restart — fine for a demo. For
+# PERSISTENT storage, switch the API to a paid plan and enable the `disk` block
+# (see the commented lines), then point STORAGE_DIR/DATABASE_URL at /var/data.
+
+services:
+  # ---------------------------------------------------------------- API ----
+  - type: web
+    name: pathoslide-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    # --- Persistent storage (paid): set `plan: starter` and uncomment: ---
+    # disk:
+    #   name: data
+    #   mountPath: /var/data
+    #   sizeGB: 5
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"          # NOT 3.14 — some wheels aren't built for it yet
+      - key: SECRET_KEY
+        generateValue: true      # Render generates a strong random value
+      - key: ALLOW_DEV_LOGIN
+        value: "false"           # Google-only in production
+      - key: STORAGE_DIR
+        value: ./storage         # persistent: /var/data/storage
+      - key: DATABASE_URL
+        value: sqlite:///./pathology.db   # persistent: sqlite:////var/data/pathology.db
+      - key: GOOGLE_CLIENT_ID
+        sync: false              # set to your Google OAuth Web client ID
+      - key: CORS_ORIGINS
+        sync: false              # set to the web URL, e.g. https://pathoslide-web.onrender.com
+
+  # ---------------------------------------------------------------- WEB ----
+  - type: web
+    name: pathoslide-web
+    runtime: static
+    rootDir: frontend
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false              # set to the API URL + /api, e.g. https://pathoslide-api.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html   # SPA fallback for client-side routing
