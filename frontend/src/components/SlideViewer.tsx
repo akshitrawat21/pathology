@@ -175,7 +175,11 @@ export default function SlideViewer({
       </div>
 
       <div className="osd-canvas">
-        <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
+        {/* OpenSeadragon forces `position: relative` on its host element, which
+            would break `inset: 0` sizing and collapse the canvas to 0px tall
+            (the slide then renders at sub-pixel size and looks blank). Size it
+            with width/height instead so it fills `.osd-canvas` regardless. */}
+        <div ref={containerRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }} />
 
         {status === "loading" && (
           <div className="viewer-overlay">
